@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -36,12 +37,15 @@ var entryCmd = &cobra.Command{
 			fmt.Fprintf(os.Stderr, "directory %s does exist. \\o/\n", path)
 			year, month, day := time.Now().Date()
 			md := filepath.Join(path, fmt.Sprintf("%d", year), strings.ToLower(month.String()))
-			df := filepath.Join(md, fmt.Sprintf("%d", day))
+			df := filepath.Join(md, fmt.Sprintf("%d.md", day))
 
 			if err = os.MkdirAll(md, 0755); err != nil {
 				fmt.Fprintf(os.Stderr, "directory %s can not be created.\n", md)
 			}
-			fmt.Printf("%s\n", df)
+			if err := ioutil.WriteFile(df, []byte(fmt.Sprintf("# %d-%s-%d\n", year, month, day)), 0644); err != nil {
+				fmt.Fprintf(os.Stderr, "file %s can not be written.\n", df)
+			}
+			fmt.Fprintf(os.Stdout, "%s\n", df)
 
 		} else {
 			fmt.Fprintf(os.Stderr, "directory %s does not exist.\n", path)

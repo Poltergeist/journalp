@@ -17,10 +17,12 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 )
 
 // entryCmd represents the entry command
@@ -32,6 +34,15 @@ var entryCmd = &cobra.Command{
 		path := viper.GetString("journalpDir")
 		if _, err := os.Stat(path); err == nil {
 			fmt.Fprintf(os.Stderr, "directory %s does exist. \\o/\n", path)
+			year, month, day := time.Now().Date()
+			md := filepath.Join(path, fmt.Sprintf("%d", year), strings.ToLower(month.String()))
+			df := filepath.Join(md, fmt.Sprintf("%d", day))
+
+			if err = os.MkdirAll(md, 0755); err != nil {
+				fmt.Fprintf(os.Stderr, "directory %s can not be created.\n", md)
+			}
+			fmt.Printf("%s\n", df)
+
 		} else {
 			fmt.Fprintf(os.Stderr, "directory %s does not exist.\n", path)
 		}

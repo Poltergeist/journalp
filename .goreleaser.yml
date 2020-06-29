@@ -16,6 +16,10 @@ archives:
     windows: Windows
     386: i386
     amd64: x86_64
+release:
+  github:
+    owner: Poltergeist
+    name: journalp
 checksum:
   name_template: 'checksums.txt'
 snapshot:

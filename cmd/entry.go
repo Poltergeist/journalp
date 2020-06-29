@@ -38,6 +38,10 @@ var entryCmd = &cobra.Command{
 			year, month, day := time.Now().Date()
 			hour, m, _ := time.Now().Clock()
 			minuteFloor := m - (m % 10)
+			minuteString := fmt.Sprintf("%d", minuteFloor)
+			if minuteFloor == 0 {
+				minuteString = "00"
+			}
 			md := filepath.Join(path, fmt.Sprintf("%d", year), strings.ToLower(month.String()))
 			df := filepath.Join(md, fmt.Sprintf("%d.md", day))
 
@@ -45,11 +49,14 @@ var entryCmd = &cobra.Command{
 				fmt.Fprintf(os.Stderr, "directory %s can not be created.\n", md)
 			}
 			if dat, err := ioutil.ReadFile(df); err == nil {
-				if err := ioutil.WriteFile(df, []byte(fmt.Sprintf("%s\n## %d:%d\n", dat, hour, minuteFloor)), 0644); err != nil {
-					fmt.Fprintf(os.Stderr, "file %s can not be written.\n", df)
+				// TODO: Potential for Refactoring
+				if !strings.Contains(string(dat), fmt.Sprintf("## %d:%s", hour, minuteString)) {
+					if err := ioutil.WriteFile(df, []byte(fmt.Sprintf("%s\n## %d:%s\n", dat, hour, minuteString)), 0644); err != nil {
+						fmt.Fprintf(os.Stderr, "file %s can not be written.\n", df)
+					}
 				}
 			} else {
-				if err := ioutil.WriteFile(df, []byte(fmt.Sprintf("# %d-%s-%d\n\n## %d:%d\n", year, month, day, hour, minuteFloor)), 0644); err != nil {
+				if err := ioutil.WriteFile(df, []byte(fmt.Sprintf("# %d-%s-%d\n\n## %d:%s\n", year, month, day, hour, minuteString)), 0644); err != nil {
 					fmt.Fprintf(os.Stderr, "file %s can not be written.\n", df)
 				}
 			}

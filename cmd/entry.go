@@ -36,14 +36,22 @@ var entryCmd = &cobra.Command{
 		if _, err := os.Stat(path); err == nil {
 			fmt.Fprintf(os.Stderr, "directory %s does exist. \\o/\n", path)
 			year, month, day := time.Now().Date()
+			hour, m, _ := time.Now().Clock()
+			minuteFloor := m - (m % 10)
 			md := filepath.Join(path, fmt.Sprintf("%d", year), strings.ToLower(month.String()))
 			df := filepath.Join(md, fmt.Sprintf("%d.md", day))
 
 			if err = os.MkdirAll(md, 0755); err != nil {
 				fmt.Fprintf(os.Stderr, "directory %s can not be created.\n", md)
 			}
-			if err := ioutil.WriteFile(df, []byte(fmt.Sprintf("# %d-%s-%d\n", year, month, day)), 0644); err != nil {
-				fmt.Fprintf(os.Stderr, "file %s can not be written.\n", df)
+			if dat, err := ioutil.ReadFile(df); err == nil {
+				if err := ioutil.WriteFile(df, []byte(fmt.Sprintf("%s\n## %d:%d\n", dat, hour, minuteFloor)), 0644); err != nil {
+					fmt.Fprintf(os.Stderr, "file %s can not be written.\n", df)
+				}
+			} else {
+				if err := ioutil.WriteFile(df, []byte(fmt.Sprintf("# %d-%s-%d\n\n## %d:%d\n", year, month, day, hour, minuteFloor)), 0644); err != nil {
+					fmt.Fprintf(os.Stderr, "file %s can not be written.\n", df)
+				}
 			}
 			fmt.Fprintf(os.Stdout, "%s\n", df)
 
